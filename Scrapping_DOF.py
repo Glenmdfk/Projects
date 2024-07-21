@@ -10,7 +10,7 @@ from selenium import webdriver
 # self libraries
 import Libs.basic_function as bs
 # global variables and config
-default_download = 'C:\\App\\Descargas'
+default_download = 'C:\\App\\Download'
 warnings.filterwarnings("ignore")
 # start definition
 class Scrapping:
@@ -27,6 +27,23 @@ class Scrapping:
             bs.time_trans('variables has been definied')
             self.trans += 1
             return url, initial_date, end_date
+        except Exception as error:
+            msg = 'Error on ' + inspect.currentframe().f_code.co_name
+            bs.time_trans(msg, error)
+            self.error += 1
+    # directories validation
+    def path_val(self):
+        try:
+            #Lista vacia
+            path_list = list()
+            #Variables de directorios
+            path_download = 'C:/App/Download'
+            path_processed = 'C:/App/Processed'
+            #Agregar a la lista de directorios
+            path_list.append(path_download)
+            path_list.append(path_processed)
+            self.trans += 1
+            return path_list
         except Exception as error:
             msg = 'Error on ' + inspect.currentframe().f_code.co_name
             bs.time_trans(msg, error)
@@ -62,9 +79,9 @@ class Scrapping:
             content = recording_table.get_attribute("outerHTML")
             
             # end of running
-            bs.time_trans('Scrapping has ended')
             driver.quit()
             self.trans += 1
+            bs.time_trans('Scrapping has ended')
             return content
         except Exception as error:
             msg = 'Error on ' + inspect.currentframe().f_code.co_name
@@ -75,7 +92,7 @@ class Scrapping:
         try:
             df_list = pd.read_html(content, header = 0)
             df_dof = df_list[0]
-            df_dof.to_excel('C:/Users/User/Documents/Git/Python/descarga.xlsx', index = False)
+            df_dof.to_excel('C:/App/Download/DOF.xlsx', index = False)
             bs.time_trans('File has been generated')
         except Exception as error:
             msg = 'Error on ' + inspect.currentframe().f_code.co_name
@@ -84,6 +101,8 @@ class Scrapping:
     #run all function
     def load(self, proc):
         try:
+            path_list = Scrapping.path_val(self)
+            bs.path_validator(path_list)
             url, initial_date, end_date = Scrapping.variables(self)
             content = Scrapping.new_scrapping(self, url, initial_date, end_date)
             Scrapping.read_table(self, content)
